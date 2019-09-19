@@ -33,4 +33,4 @@
 
 # CMake Folders
 build/
-
+*.json

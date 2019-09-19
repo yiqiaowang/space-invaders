@@ -9,6 +9,10 @@ endif()
 
 message(" [INFO] VCPKG CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
 
+#============== clangd Bootstrap ==============# 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+
 #======= Global Project Configuration =========#
 
 set(PROJECT_NAME
