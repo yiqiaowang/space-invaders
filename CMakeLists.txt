@@ -26,6 +26,7 @@ set(CMAKE_CXX_STANDARD 17)
 #========== Library Configurations ============#
 find_package(spdlog CONFIG REQUIRED)
 find_package(doctest CONFIG REQUIRED)
+find_path(dbg.h CONFIG REQUIRED)
 
 
 
