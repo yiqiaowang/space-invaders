@@ -28,6 +28,8 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(doctest CONFIG REQUIRED)
 find_path(dbg.h CONFIG REQUIRED)
 
+find_package(glfw3 CONFIG REQUIRED)
+find_package(GLEW CONFIG REQUIRED)
 
 
 #========== Targets Configurations ============#
@@ -36,6 +38,8 @@ find_path(dbg.h CONFIG REQUIRED)
 add_executable(main src/main.cpp)
 target_link_libraries(main PRIVATE
         spdlog::spdlog
+        glfw
+        GLEW::GLEW
 )
 
 ## ==> Target: test - Executable: test
