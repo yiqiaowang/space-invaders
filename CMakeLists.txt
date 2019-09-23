@@ -14,7 +14,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 #======= Global Project Configuration =========#
-
 set(PROJECT_NAME
         DummyProject # Change this!
 )
@@ -36,6 +35,9 @@ find_package(GLEW CONFIG REQUIRED)
 
 ## ==> Target: main - Executable: main
 add_executable(main src/main.cpp)
+target_include_directories(main PRIVATE
+    include
+    )
 target_link_libraries(main PRIVATE
         spdlog::spdlog
         glfw
