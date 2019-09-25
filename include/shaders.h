@@ -1,3 +1,6 @@
+#ifndef SHADERS_H
+#define SHADERS_H
+
 const char* vertex_shader =
     "\n"
     "#version 330\n"
@@ -25,3 +28,5 @@ const char* fragment_shader =
     "    outColor = texture(buffer, TexCoord).rgb;\n"
     "}\n";
 
+
+#endif /* SHADERS_H */

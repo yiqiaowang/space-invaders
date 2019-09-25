@@ -1,9 +1,13 @@
+/* External libraries */
 #include "spdlog/spdlog.h"
 #include "dbg.h"
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+
+/* Internal libraries */
 #include "buffer.h"
 #include "shaders.h"
+#include "sprite.h"
 
 void error_callback(int error, const char* description)
 {
@@ -147,6 +151,29 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+
+
+
+    /* Define a sprite */
+    Sprite alien_sprite;
+    alien_sprite.width = 11;
+    alien_sprite.height = 8;
+    alien_sprite.data = new uint8_t[11 * 8]
+    {
+        0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
+        0,0,0,1,0,0,0,1,0,0,0, // ...@...@...
+        0,0,1,1,1,1,1,1,1,0,0, // ..@@@@@@@..
+        0,1,1,0,1,1,1,0,1,1,0, // .@@.@@@.@@.
+        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+        1,0,1,1,1,1,1,1,1,0,1, // @.@@@@@@@.@
+        1,0,1,0,0,0,0,0,1,0,1, // @.@.....@.@
+        0,0,0,1,1,0,1,1,0,0,0  // ...@@.@@...
+    };
+
+
+    buffer_sprite_draw(&buffer, alien_sprite,
+            112, 128, rgb_to_uint32(128, 0, 0));
+
     /* Attach texture to fragment shader */
     GLint location = glGetUniformLocation(shader_id, "buffer");
     glUniform1i(location, 0);
@@ -162,6 +189,12 @@ int main()
     {
         glClear(GL_COLOR_BUFFER_BIT);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        glTexSubImage2D(
+                GL_TEXTURE_2D, 0, 0, 0,
+                buffer.width, buffer.height,
+                GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
+                buffer.data
+                );
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

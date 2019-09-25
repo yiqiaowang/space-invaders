@@ -1,3 +1,6 @@
+#ifndef BUFFER_H
+#define BUFFER_H
+
 #include <cstdint>
 
 struct Buffer
@@ -19,3 +22,5 @@ void buffer_clear(Buffer* buffer, uint32_t color)
         buffer->data[i] = color;
     }
 }
+
+#endif /* BUFFER_H */
