@@ -11,6 +11,15 @@ struct Sprite
     uint8_t* data;
 };
 
+struct SpriteAnimation
+{
+    bool loop;
+    std::size_t num_frames;
+    std::size_t frame_duration;
+    std::size_t time;
+    Sprite** frames;
+};
+
 void buffer_sprite_draw(
     Buffer* buffer, const Sprite& sprite,
     std::size_t x, std::size_t y, uint32_t color
@@ -29,4 +38,5 @@ void buffer_sprite_draw(
         }
     }
 }
+
 #endif /* SPRITE_H */

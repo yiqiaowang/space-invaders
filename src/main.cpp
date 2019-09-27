@@ -8,6 +8,7 @@
 #include "buffer.h"
 #include "shaders.h"
 #include "sprite.h"
+#include "game.h"
 
 void error_callback(int error, const char* description)
 {
@@ -170,15 +171,89 @@ int main()
         0,0,0,1,1,0,1,1,0,0,0  // ...@@.@@...
     };
 
+    Sprite player_sprite;
+    player_sprite.width = 11;
+    player_sprite.height = 7;
+    player_sprite.data = new uint8_t[77]
+    {
+        0,0,0,0,0,1,0,0,0,0,0, // .....@.....
+        0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
+        0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
+        0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
+        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+    };
 
-    buffer_sprite_draw(&buffer, alien_sprite,
-            112, 128, rgb_to_uint32(128, 0, 0));
+    Sprite alien_sprite1;
+    alien_sprite1.width = 11;
+    alien_sprite1.height = 8;
+    alien_sprite1.data = new uint8_t[88]
+    {
+        0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
+            1,0,0,1,0,0,0,1,0,0,1, // @..@...@..@
+            1,0,1,1,1,1,1,1,1,0,1, // @.@@@@@@@.@
+            1,1,1,0,1,1,1,0,1,1,1, // @@@.@@@.@@@
+            1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+            0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
+            0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
+            0,1,0,0,0,0,0,0,0,1,0  // .@.......@.
+    };
+
+
+    Game game;
+    game.width = buffer_width;
+    game.height = buffer_height;
+    game.num_aliens = 55;
+    game.aliens = new Alien[game.num_aliens];
+
+    game.player.x = 112 - 5;
+    game.player.y = 32;
+
+    game.player.life = 3;
+
+    for(size_t yi = 0; yi < 5; ++yi)
+    {
+        for(size_t xi = 0; xi < 11; ++xi)
+        {
+            game.aliens[yi * 11 + xi].x = 16 * xi + 20;
+            game.aliens[yi * 11 + xi].y = 17 * yi + 128;
+        }
+    }
+
+    // Setup initial game state
+    for(size_t ai = 0; ai < game.num_aliens; ++ai)
+    {
+        const Alien& alien = game.aliens[ai];
+        buffer_sprite_draw(&buffer, alien_sprite,
+            alien.x, alien.y, rgb_to_uint32(128, 0, 0));
+    }
+
+    buffer_sprite_draw(&buffer, player_sprite, game.player.x, game.player.y, rgb_to_uint32(128, 0, 0));
+
+
+    // Create an animated alien
+    SpriteAnimation* alien_animation = new SpriteAnimation;
+
+    alien_animation->loop = true;
+    alien_animation->num_frames = 2;
+    alien_animation->frame_duration = 10;
+    alien_animation->time = 0;
+
+    alien_animation->frames = new Sprite*[2];
+    alien_animation->frames[0] = &alien_sprite;
+    alien_animation->frames[1] = &alien_sprite1;
+
+    // Create animated player
+    int player_move_dir = 1; 
 
     /* Attach texture to fragment shader */
     GLint location = glGetUniformLocation(shader_id, "buffer");
     glUniform1i(location, 0);
 
-
+    /* Enable vsync */
+    glfwSwapInterval(1);
+    
     /* Bind vertex array */
     glDisable(GL_DEPTH_TEST);
     glBindVertexArray(fullscreen_triangle_vao);
@@ -197,6 +272,39 @@ int main()
                 );
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+
+        // Animate Alien
+        ++alien_animation->time;
+        if(alien_animation->time == alien_animation->num_frames * alien_animation->frame_duration)
+        {
+            if(alien_animation->loop) alien_animation->time = 0;
+            else
+            {
+                delete alien_animation;
+                alien_animation = nullptr;
+            }
+        }
+        for(size_t ai = 0; ai < game.num_aliens; ++ai)
+        {
+            const Alien& alien = game.aliens[ai];
+            size_t current_frame = alien_animation->time / alien_animation->frame_duration;
+            const Sprite& sprite = *alien_animation->frames[current_frame];
+            buffer_sprite_draw(&buffer, sprite, alien.x, alien.y, rgb_to_uint32(128, 0, 0));
+        }
+
+        // Animate Player
+        if(game.player.x + player_sprite.width + player_move_dir >= game.width - 1)
+        {
+            game.player.x = game.width - player_sprite.width - player_move_dir - 1;
+            player_move_dir *= -1;
+        }
+        else if((int)game.player.x + player_move_dir <= 0)
+        {
+            game.player.x = 0;
+            player_move_dir *= -1;
+        }
+        else game.player.x += player_move_dir;
     }
     glfwDestroyWindow(window);
     glfwTerminate();
